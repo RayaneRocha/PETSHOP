@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PetShop Amigo - Carrinho</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="/index.html" class="logo">🐾 PetShop <span>Amigo</span></a>
+      <nav class="nav" id="nav"></nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Seu carrinho</h1>
+      <p id="vip-info" class="hint"></p>
+    </section>
+
+    <div id="alert" class="alert hidden" role="alert"></div>
+
+    <section id="order-success" class="panel order-success hidden" aria-live="polite"></section>
+
+    <div class="cart-layout" id="cart-layout">
+      <section class="panel">
+        <h2>Itens</h2>
+        <div id="cart-items"><p class="hint">Carregando...</p></div>
+      </section>
+
+      <aside class="panel" id="checkout-panel">
+        <h2>Finalizar compra</h2>
+        <form id="checkout-form">
+          <fieldset style="border:none;padding:0;margin:0">
+            <legend class="hint">Forma de pagamento</legend>
+            <div class="payment-options">
+              <label class="payment-option">
+                <input type="radio" name="paymentMethod" value="pix" checked> Pix
+                <span class="tag-pix">5% OFF</span>
+              </label>
+              <label class="payment-option">
+                <input type="radio" name="paymentMethod" value="cartao_credito"> Cartão de crédito
+              </label>
+              <label class="payment-option">
+                <input type="radio" name="paymentMethod" value="boleto"> Boleto
+              </label>
+            </div>
+          </fieldset>
+
+          <div id="summary"></div>
+
+          <button class="btn btn-block" type="submit" id="checkout-btn" disabled>Finalizar compra</button>
+        </form>
+      </aside>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/carrinho.js"></script>
+</body>
+</html>

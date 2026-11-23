@@ -27,11 +27,9 @@
             ${p.inStock ? `${p.stock} em estoque` : 'Esgotado'}
           </div>
           <form class="card-actions" data-product="${p.id}">
-            <input type="number" name="quantity" min="1" max="${p.stock}" value="1"
-              aria-label="Quantidade" ${p.inStock ? '' : 'disabled'}>
-            <button class="btn" type="submit" ${p.inStock ? '' : 'disabled'}>
-              ${p.inStock ? 'Adicionar ao carrinho' : 'Sem estoque'}
-            </button>
+            <input type="number" name="quantity" min="1" ${p.inStock ? `max="${p.stock}"` : ''} value="1"
+              aria-label="Quantidade">
+            <button class="btn" type="submit">Adicionar ao carrinho</button>
           </form>
         </div>
       </article>`

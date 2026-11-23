@@ -48,20 +48,22 @@
 
     itemsEl.innerHTML = cart.items
       .map((item) => {
-        const overStock = item.quantity > item.stock;
+        const soldOut = item.stock <= 0;
+        const overStock = !soldOut && item.quantity > item.stock;
         return `
         <div class="cart-item" data-product="${item.productId}">
           <div class="cart-item-emoji" aria-hidden="true">${escapeHtml(item.emoji)}</div>
           <div>
             <div class="cart-item-name">${escapeHtml(item.name)}</div>
-            <div class="cart-item-meta">${formatBRL(item.unitPrice)} cada · ${item.stock} em estoque</div>
+            <div class="cart-item-meta">${formatBRL(item.unitPrice)} cada · ${soldOut ? 'esgotado' : `${item.stock} em estoque`}</div>
+            ${soldOut ? '<div class="stock out">Produto esgotado: remova-o para finalizar a compra</div>' : ''}
             ${overStock ? '<div class="stock out">Quantidade maior que o estoque atual</div>' : ''}
           </div>
           <div class="cart-item-controls">
             <div class="qty">
               <button type="button" data-action="decrease" aria-label="Diminuir" ${item.quantity <= 1 ? 'disabled' : ''}>−</button>
               <span>${item.quantity}</span>
-              <button type="button" data-action="increase" aria-label="Aumentar" ${item.quantity >= item.stock ? 'disabled' : ''}>+</button>
+              <button type="button" data-action="increase" aria-label="Aumentar" ${!soldOut && item.quantity >= item.stock ? 'disabled' : ''}>+</button>
             </div>
             <span class="line-total">${formatBRL(item.lineTotal)}</span>
             <button type="button" class="link-button" data-action="remove">Remover</button>

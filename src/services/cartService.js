@@ -30,11 +30,11 @@ async function findProductOrFail(productId) {
   return product;
 }
 
-// Regra 2: só é possível ter no carrinho a quantidade disponível em estoque.
+// Regra 2: produtos esgotados (estoque 0) podem ser adicionados ao carrinho, mas a compra
+// só é finalizada com estoque disponível (ver checkoutService). Para produtos com estoque,
+// a quantidade no carrinho não pode passar do estoque.
 function assertStock(product, desiredQuantity) {
-  if (product.stock <= 0) {
-    throw new AppError(409, `O produto "${product.name}" está sem estoque.`);
-  }
+  if (product.stock <= 0) return;
   if (desiredQuantity > product.stock) {
     throw new AppError(
       409,

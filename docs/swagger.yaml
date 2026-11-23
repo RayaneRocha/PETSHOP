@@ -1,0 +1,448 @@
+openapi: 3.0.3
+info:
+  title: PetShop Amigo - API
+  version: 1.0.0
+  description: |
+    API REST do e-commerce de pet shop **PetShop Amigo**.
+
+    Funcionalidades: **Login**, **Cadastro**, **Carrinho** e **Finalização de Compra**.
+
+    **Regras de negócio**
+    1. Pagamento em **Pix** recebe **5% de desconto** sobre o subtotal dos produtos.
+    2. Produtos só podem ser adicionados ao carrinho se tiverem **estoque** suficiente.
+    3. Apenas clientes **VIP** ganham **frete grátis** (os demais pagam R$ 15,00).
+       O cliente se torna VIP depois de gastar **R$ 100,00** em compras.
+
+    **Autenticação:** faça login em `POST /api/auth/login`, copie o `token` e clique em
+    **Authorize** informando apenas o token (o prefixo `Bearer` é adicionado automaticamente).
+
+    Usuários de teste (senha `senha123`): `ana@petshop.com` (comum),
+    `bruno@petshop.com` (VIP) e `carla@petshop.com` (R$ 80,00 gastos).
+servers:
+  - url: http://localhost:3000
+    description: Ambiente local
+tags:
+  - name: Autenticação
+    description: Cadastro, login e dados do usuário logado
+  - name: Produtos
+    description: Catálogo de produtos
+  - name: Carrinho
+    description: Gerenciamento do carrinho do usuário logado
+  - name: Checkout
+    description: Finalização de compra
+  - name: Sistema
+    description: Saúde da aplicação
+
+paths:
+  /api/health:
+    get:
+      tags: [Sistema]
+      summary: Verifica se a API está no ar
+      responses:
+        '200':
+          description: API disponível
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+
+  /api/auth/register:
+    post:
+      tags: [Autenticação]
+      summary: Cadastra um novo cliente
+      description: Cria o usuário e já devolve um token de acesso. Todo cliente começa não VIP.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterRequest' }
+      responses:
+        '201':
+          description: Usuário cadastrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '409':
+          description: E-mail já cadastrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/auth/login:
+    post:
+      tags: [Autenticação]
+      summary: Realiza login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Login realizado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401':
+          description: E-mail ou senha inválidos
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/auth/me:
+    get:
+      tags: [Autenticação]
+      summary: Retorna o usuário logado
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Dados do usuário
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/products:
+    get:
+      tags: [Produtos]
+      summary: Lista os produtos
+      responses:
+        '200':
+          description: Lista de produtos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  products:
+                    type: array
+                    items: { $ref: '#/components/schemas/Product' }
+
+  /api/products/{id}:
+    get:
+      tags: [Produtos]
+      summary: Detalha um produto
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Produto
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  product: { $ref: '#/components/schemas/Product' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/cart:
+    get:
+      tags: [Carrinho]
+      summary: Consulta o carrinho
+      description: |
+        Retorna os itens e o resumo de valores. Informe `paymentMethod` para simular
+        o total com aquela forma de pagamento (ex.: `pix` aplica 5% de desconto).
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: paymentMethod
+          in: query
+          required: false
+          schema: { $ref: '#/components/schemas/PaymentMethod' }
+      responses:
+        '200':
+          description: Carrinho
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Cart' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    delete:
+      tags: [Carrinho]
+      summary: Esvazia o carrinho
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Carrinho vazio
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Cart' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/cart/items:
+    post:
+      tags: [Carrinho]
+      summary: Adiciona um produto ao carrinho
+      description: |
+        **Regra 2:** o produto só é adicionado se houver estoque. Se ele já estiver no carrinho,
+        a quantidade é somada e o total não pode passar do estoque disponível.
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [productId]
+              properties:
+                productId: { type: string, example: 6740f1a2b3c4d5e6f7a8b9c0 }
+                quantity: { type: integer, minimum: 1, default: 1, example: 1 }
+      responses:
+        '201':
+          description: Produto adicionado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Cart' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/OutOfStock' }
+
+  /api/cart/items/{productId}:
+    put:
+      tags: [Carrinho]
+      summary: Altera a quantidade de um produto do carrinho
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [quantity]
+              properties:
+                quantity: { type: integer, minimum: 1, example: 2 }
+      responses:
+        '200':
+          description: Quantidade atualizada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Cart' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/OutOfStock' }
+    delete:
+      tags: [Carrinho]
+      summary: Remove um produto do carrinho
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Produto removido
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Cart' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/checkout:
+    post:
+      tags: [Checkout]
+      summary: Finaliza a compra do carrinho
+      description: |
+        Valida o estoque, aplica as regras de negócio, baixa o estoque, cria o pedido,
+        soma o valor pago ao total gasto do cliente e esvazia o carrinho.
+
+        - **Pix:** 5% de desconto sobre o subtotal dos produtos.
+        - **Frete:** grátis para clientes VIP; R$ 15,00 para os demais. O status VIP considerado
+          é o do cliente **antes** da compra. Se esta compra levar o total gasto a R$ 100,00 ou mais,
+          o cliente passa a ser VIP a partir da próxima compra (`becameVip: true`).
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [paymentMethod]
+              properties:
+                paymentMethod: { $ref: '#/components/schemas/PaymentMethod' }
+      responses:
+        '201':
+          description: Compra finalizada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CheckoutResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/OutOfStock' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    BadRequest:
+      description: Requisição inválida
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthorized:
+      description: Token ausente, inválido ou expirado
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Recurso não encontrado
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    OutOfStock:
+      description: Estoque insuficiente
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example:
+            error: O produto "Coleira Antipulgas" está sem estoque.
+
+  schemas:
+    PaymentMethod:
+      type: string
+      enum: [pix, cartao_credito, boleto]
+      example: pix
+
+    RegisterRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name: { type: string, minLength: 2, example: Diego Alves }
+        email: { type: string, format: email, example: diego@petshop.com }
+        password: { type: string, minLength: 6, example: senha123 }
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email, example: ana@petshop.com }
+        password: { type: string, example: senha123 }
+
+    User:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string, example: Ana Souza }
+        email: { type: string, example: ana@petshop.com }
+        totalSpent: { type: number, example: 0, description: Total já gasto em compras (R$) }
+        isVip: { type: boolean, example: false }
+
+    AuthResponse:
+      type: object
+      properties:
+        token: { type: string, description: JWT para o header Authorization }
+        user: { $ref: '#/components/schemas/User' }
+
+    Product:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string, example: Ração Premium para Cães Adultos 10kg }
+        description: { type: string }
+        category: { type: string, example: Cães }
+        emoji: { type: string, example: 🐶 }
+        price: { type: number, example: 149.9 }
+        stock: { type: integer, example: 10 }
+        inStock: { type: boolean, example: true }
+
+    CartItem:
+      type: object
+      properties:
+        productId: { type: string }
+        name: { type: string }
+        emoji: { type: string }
+        unitPrice: { type: number, example: 89.9 }
+        quantity: { type: integer, example: 1 }
+        stock: { type: integer, example: 5 }
+        lineTotal: { type: number, example: 89.9 }
+
+    Summary:
+      type: object
+      properties:
+        paymentMethod:
+          allOf: [{ $ref: '#/components/schemas/PaymentMethod' }]
+          nullable: true
+        subtotal: { type: number, example: 89.9 }
+        discount: { type: number, example: 4.5, description: Desconto Pix (5% do subtotal) }
+        shipping: { type: number, example: 15, description: 0 para clientes VIP }
+        total: { type: number, example: 100.4 }
+        isVip: { type: boolean, example: false }
+        freeShipping: { type: boolean, example: false }
+
+    Cart:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/CartItem' }
+        itemCount: { type: integer, example: 1 }
+        summary: { $ref: '#/components/schemas/Summary' }
+
+    OrderItem:
+      type: object
+      properties:
+        productId: { type: string }
+        name: { type: string }
+        unitPrice: { type: number }
+        quantity: { type: integer }
+        lineTotal: { type: number }
+
+    Order:
+      type: object
+      properties:
+        id: { type: string }
+        status: { type: string, example: confirmado }
+        paymentMethod: { $ref: '#/components/schemas/PaymentMethod' }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/OrderItem' }
+        subtotal: { type: number, example: 89.9 }
+        discount: { type: number, example: 4.5 }
+        shipping: { type: number, example: 15 }
+        total: { type: number, example: 100.4 }
+        vipAtPurchase: { type: boolean, example: false }
+        createdAt: { type: string, format: date-time }
+
+    CheckoutResponse:
+      type: object
+      properties:
+        order: { $ref: '#/components/schemas/Order' }
+        user: { $ref: '#/components/schemas/User' }
+        becameVip:
+          type: boolean
+          description: true se esta compra tornou o cliente VIP
+          example: true
+
+    Error:
+      type: object
+      properties:
+        error: { type: string, example: Mensagem de erro }
+        details:
+          description: Informações adicionais (lista de erros de validação ou itens sem estoque)
+          oneOf:
+            - type: array
+              items: { type: string }
+            - type: array
+              items: { type: object }

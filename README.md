@@ -65,11 +65,11 @@ Carregados automaticamente na inicialização (`src/seed.js`).
 
 ### Usuários (senha de todos: `senha123`)
 
-| Nome | E-mail | Total já gasto | VIP? | Uso sugerido |
-| --- | --- | --- | --- | --- |
-| Ana Souza | `ana@petshop.com` | R$ 0,00 | Não | Cliente novo: paga frete |
-| Bruno Lima | `bruno@petshop.com` | R$ 250,00 | **Sim** | Cliente VIP: frete grátis |
-| Carla Mendes | `carla@petshop.com` | R$ 80,00 | Não | Vira VIP após qualquer compra acima de R$ 20,00 |
+| Nome | E-mail |
+| --- | --- |
+| Ana Souza | `ana@petshop.com` |
+| Bruno Lima | `bruno@petshop.com` |
+| Carla Mendes | `carla@petshop.com` |
 
 ### Produtos
 
@@ -83,20 +83,24 @@ Carregados automaticamente na inicialização (`src/seed.js`).
 
 1. **Desconto no Pix:** pagamentos com `paymentMethod = pix` recebem **5% de desconto sobre o subtotal dos produtos** (o frete não entra no cálculo do desconto). Formas de pagamento aceitas: `pix`, `cartao_credito` e `boleto`.
 2. **Estoque:** um produto só pode ser adicionado ao carrinho se tiver estoque. A quantidade total do produto no carrinho (incluindo o que já estava lá) não pode passar do estoque disponível — caso contrário a API responde `409 Conflict`. O estoque é **revalidado na finalização** da compra e baixado somente quando o pedido é confirmado.
-3. **Frete grátis para VIP:** apenas clientes **VIP** têm frete grátis; os demais pagam frete fixo de **R$ 15,00**. O cliente se torna VIP quando a soma do que ele **já pagou** em compras (`totalSpent`) chega a **R$ 100,00** ou mais.
-   - O status VIP considerado no frete é o do cliente **antes** da compra atual. A compra que faz o cliente atingir R$ 100,00 ainda paga frete; a partir da próxima, o frete é grátis. A resposta do checkout informa `becameVip: true` nesse caso.
-   - O valor somado ao `totalSpent` é o **total pago** no pedido (subtotal − desconto + frete).
+3. **Frete grátis acima de R$ 100,00:** compras cujo **subtotal dos produtos** passa de **R$ 100,00** têm frete grátis, para qualquer cliente. As demais pagam frete fixo de **R$ 15,00**.
+   - A comparação usa o subtotal **antes** do desconto do Pix.
+   - Exatamente R$ 100,00 não conta como "acima": paga frete.
 
 Cálculo do pedido:
 
 ```
 subtotal = Σ (preço × quantidade)
 desconto = 5% do subtotal, se pagamento = pix; senão 0
-frete    = 0 se o cliente é VIP; senão R$ 15,00
+frete    = 0 se subtotal > R$ 100,00; senão R$ 15,00
 total    = subtotal − desconto + frete
 ```
 
-Exemplo: Ana (não VIP) compra 1 Arranhador (R$ 89,90) no Pix → desconto R$ 4,50 + frete R$ 15,00 = **R$ 100,40**. Como ela passa a ter gastado R$ 100,40, vira VIP na próxima compra.
+Exemplos:
+
+- 1 Arranhador (R$ 89,90) no Pix → R$ 89,90 − R$ 4,50 + R$ 15,00 de frete = **R$ 100,40**.
+- 2 Arranhadores (R$ 179,80) no Pix → R$ 179,80 − R$ 8,99 + frete grátis = **R$ 170,81**.
+- 1 Ração (R$ 149,90) no boleto → R$ 149,90 + frete grátis = **R$ 149,90**.
 
 ## Quais são as URLs importantes para acessar a aplicação
 

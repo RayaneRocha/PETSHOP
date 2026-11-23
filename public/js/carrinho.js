@@ -9,11 +9,10 @@
   const alertBox = document.getElementById('alert');
   const form = document.getElementById('checkout-form');
   const checkoutBtn = document.getElementById('checkout-btn');
-  const vipInfo = document.getElementById('vip-info');
+  const shippingInfo = document.getElementById('shipping-info');
   const successEl = document.getElementById('order-success');
   const layout = document.getElementById('cart-layout');
 
-  const VIP_THRESHOLD = 100;
   const paymentLabels = { pix: 'Pix', cartao_credito: 'Cartão de crédito', boleto: 'Boleto' };
 
   const selectedPayment = () => form.paymentMethod.value;
@@ -24,13 +23,15 @@
   };
   const hideAlert = () => { alertBox.className = 'alert hidden'; };
 
-  function renderVipInfo(user) {
-    if (!user) return;
-    if (user.isVip) {
-      vipInfo.innerHTML = '<span class="badge-vip">VIP</span> Você é cliente VIP: frete grátis em todas as compras!';
+  function renderShippingInfo(summary, isEmpty) {
+    const threshold = formatBRL(summary.freeShippingThreshold);
+    if (isEmpty) {
+      shippingInfo.textContent = `Frete grátis em compras acima de ${threshold}.`;
+    } else if (summary.freeShipping) {
+      shippingInfo.textContent = '🚚 Sua compra tem frete grátis!';
     } else {
-      const missing = Math.max(VIP_THRESHOLD - user.totalSpent, 0);
-      vipInfo.textContent = `Você já gastou ${formatBRL(user.totalSpent)}. Faltam ${formatBRL(missing)} em compras para virar VIP e ganhar frete grátis.`;
+      const missing = Math.max(summary.freeShippingThreshold - summary.subtotal, 0);
+      shippingInfo.textContent = `Faltam ${formatBRL(missing)} em produtos para passar de ${threshold} e ganhar frete grátis.`;
     }
   }
 
@@ -78,10 +79,11 @@
         : ''}
       <div class="summary-row">
         <span>Frete</span>
-        <span>${isEmpty ? '—' : summary.freeShipping ? 'Grátis (VIP)' : formatBRL(summary.shipping)}</span>
+        <span>${isEmpty ? '—' : summary.freeShipping ? 'Grátis' : formatBRL(summary.shipping)}</span>
       </div>
       <div class="summary-row total"><span>Total</span><span>${formatBRL(summary.total)}</span></div>`;
     checkoutBtn.disabled = isEmpty;
+    renderShippingInfo(summary, isEmpty);
   }
 
   async function loadCart() {
@@ -104,8 +106,7 @@
     }
   }
 
-  const user = await renderHeader();
-  renderVipInfo(user);
+  await renderHeader();
   await refresh();
 
   form.addEventListener('change', (event) => {
@@ -142,7 +143,7 @@
     checkoutBtn.textContent = 'Processando...';
 
     try {
-      const { order, user: updatedUser, becameVip } = await api('/api/checkout', {
+      const { order } = await api('/api/checkout', {
         method: 'POST',
         body: { paymentMethod: selectedPayment() },
       });
@@ -157,12 +158,11 @@
         </ul>
         <div class="summary-row"><span>Subtotal</span><span>${formatBRL(order.subtotal)}</span></div>
         ${order.discount > 0 ? `<div class="summary-row discount"><span>Desconto Pix (5%)</span><span>− ${formatBRL(order.discount)}</span></div>` : ''}
-        <div class="summary-row"><span>Frete</span><span>${order.vipAtPurchase ? 'Grátis (VIP)' : formatBRL(order.shipping)}</span></div>
+        <div class="summary-row"><span>Frete</span><span>${order.freeShipping ? 'Grátis' : formatBRL(order.shipping)}</span></div>
         <div class="summary-row total"><span>Total pago</span><span>${formatBRL(order.total)}</span></div>
-        ${becameVip ? '<div class="alert alert-success" style="margin-top:16px">⭐ Parabéns! Você se tornou cliente VIP e terá frete grátis nas próximas compras.</div>' : ''}
         <p><a class="btn" href="/index.html">Continuar comprando</a></p>`;
 
-      renderVipInfo(updatedUser);
+      shippingInfo.textContent = '';
       await renderHeader();
     } catch (err) {
       showAlert(errorMessage(err));

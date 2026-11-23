@@ -8,8 +8,8 @@ const { getOrCreateCart } = require('./cartService');
 /**
  * Finaliza a compra do carrinho do usuário:
  * 1. valida a forma de pagamento e o estoque de cada item;
- * 2. calcula os valores (desconto Pix e frete conforme status VIP ANTES da compra);
- * 3. baixa o estoque, cria o pedido, soma o total gasto do cliente e esvazia o carrinho.
+ * 2. calcula os valores (desconto Pix e frete grátis acima de R$ 100,00);
+ * 3. baixa o estoque, cria o pedido e esvazia o carrinho.
  */
 async function checkout(user, paymentMethod) {
   if (!isValidPaymentMethod(paymentMethod)) {
@@ -45,7 +45,7 @@ async function checkout(user, paymentMethod) {
     lineTotal: roundMoney(item.product.price * item.quantity),
   }));
 
-  const totals = calculateTotals({ items, paymentMethod, totalSpent: user.totalSpent });
+  const totals = calculateTotals({ items, paymentMethod });
 
   // Baixa de estoque condicional (só baixa se ainda houver quantidade suficiente).
   const decremented = [];
@@ -75,22 +75,13 @@ async function checkout(user, paymentMethod) {
     discount: totals.discount,
     shipping: totals.shipping,
     total: totals.total,
-    vipAtPurchase: totals.isVip,
+    freeShipping: totals.freeShipping,
   });
-
-  // Regra 3: o valor pago entra no total gasto, que define o status VIP para as próximas compras.
-  const wasVip = user.isVip;
-  user.totalSpent = roundMoney(user.totalSpent + totals.total);
-  await user.save();
 
   cart.items = [];
   await cart.save();
 
-  return {
-    order: order.toPublicJSON(),
-    user: user.toPublicJSON(),
-    becameVip: !wasVip && user.isVip,
-  };
+  return { order: order.toPublicJSON() };
 }
 
 module.exports = { checkout };

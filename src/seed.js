@@ -32,9 +32,9 @@ const products = [
 ];
 
 const users = [
-  { name: 'Ana Souza', email: 'ana@petshop.com', totalSpent: 0 }, // cliente novo (não VIP)
-  { name: 'Bruno Lima', email: 'bruno@petshop.com', totalSpent: 250 }, // cliente VIP
-  { name: 'Carla Mendes', email: 'carla@petshop.com', totalSpent: 80 }, // perto de virar VIP
+  { name: 'Ana Souza', email: 'ana@petshop.com' },
+  { name: 'Bruno Lima', email: 'bruno@petshop.com' },
+  { name: 'Carla Mendes', email: 'carla@petshop.com' },
 ];
 
 async function seed() {

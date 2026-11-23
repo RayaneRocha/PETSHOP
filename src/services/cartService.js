@@ -72,7 +72,7 @@ async function buildCartView(user, paymentMethod) {
   return {
     items,
     itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
-    summary: calculateTotals({ items, paymentMethod, totalSpent: user.totalSpent }),
+    summary: calculateTotals({ items, paymentMethod }),
   };
 }
 

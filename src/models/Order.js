@@ -20,7 +20,7 @@ const orderSchema = new mongoose.Schema(
     discount: { type: Number, required: true },
     shipping: { type: Number, required: true },
     total: { type: Number, required: true },
-    vipAtPurchase: { type: Boolean, required: true },
+    freeShipping: { type: Boolean, required: true },
     status: { type: String, default: 'confirmado' },
   },
   { timestamps: true }
@@ -42,7 +42,7 @@ orderSchema.methods.toPublicJSON = function toPublicJSON() {
     discount: this.discount,
     shipping: this.shipping,
     total: this.total,
-    vipAtPurchase: this.vipAtPurchase,
+    freeShipping: this.freeShipping,
     createdAt: this.createdAt,
   };
 };

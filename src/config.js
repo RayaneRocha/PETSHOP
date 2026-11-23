@@ -6,8 +6,8 @@ module.exports = {
   // Regras de negócio
   business: {
     pixDiscountRate: 0.05, // 5% de desconto para pagamentos em Pix
-    shippingFee: 15.0, // frete fixo para clientes não VIP (R$)
-    vipThreshold: 100.0, // total gasto (R$) para se tornar VIP
+    shippingFee: 15.0, // frete fixo (R$)
+    freeShippingThreshold: 100.0, // frete grátis para compras com subtotal acima deste valor (R$)
     paymentMethods: ['pix', 'cartao_credito', 'boleto'],
   },
 };

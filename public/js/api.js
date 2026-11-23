@@ -105,7 +105,7 @@ async function renderHeader() {
     nav.innerHTML = `
       <a href="/index.html">Produtos</a>
       <a href="/carrinho.html" class="cart-link">🛒 Carrinho<span class="cart-count" id="cart-count">${cartCount}</span></a>
-      <span class="user-chip">Olá, ${escapeHtml(user.name.split(' ')[0])}${user.isVip ? '<span class="badge-vip">VIP</span>' : ''}</span>
+      <span class="user-chip">Olá, ${escapeHtml(user.name.split(' ')[0])}</span>
       <button class="link-button" id="logout-btn" type="button">Sair</button>
     `;
     document.getElementById('logout-btn').addEventListener('click', auth.logout);

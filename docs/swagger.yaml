@@ -10,14 +10,14 @@ info:
     **Regras de negócio**
     1. Pagamento em **Pix** recebe **5% de desconto** sobre o subtotal dos produtos.
     2. Produtos só podem ser adicionados ao carrinho se tiverem **estoque** suficiente.
-    3. Apenas clientes **VIP** ganham **frete grátis** (os demais pagam R$ 15,00).
-       O cliente se torna VIP depois de gastar **R$ 100,00** em compras.
+    3. Compras com subtotal dos produtos **acima de R$ 100,00** têm **frete grátis**
+       (as demais pagam R$ 15,00).
 
     **Autenticação:** faça login em `POST /api/auth/login`, copie o `token` e clique em
     **Authorize** informando apenas o token (o prefixo `Bearer` é adicionado automaticamente).
 
-    Usuários de teste (senha `senha123`): `ana@petshop.com` (comum),
-    `bruno@petshop.com` (VIP) e `carla@petshop.com` (R$ 80,00 gastos).
+    Usuários de teste (senha `senha123`): `ana@petshop.com`,
+    `bruno@petshop.com` e `carla@petshop.com`.
 servers:
   - url: http://localhost:3000
     description: Ambiente local
@@ -52,7 +52,7 @@ paths:
     post:
       tags: [Autenticação]
       summary: Cadastra um novo cliente
-      description: Cria o usuário e já devolve um token de acesso. Todo cliente começa não VIP.
+      description: Cria o usuário e já devolve um token de acesso.
       requestBody:
         required: true
         content:
@@ -261,13 +261,12 @@ paths:
       tags: [Checkout]
       summary: Finaliza a compra do carrinho
       description: |
-        Valida o estoque, aplica as regras de negócio, baixa o estoque, cria o pedido,
-        soma o valor pago ao total gasto do cliente e esvazia o carrinho.
+        Valida o estoque, aplica as regras de negócio, baixa o estoque, cria o pedido
+        e esvazia o carrinho.
 
         - **Pix:** 5% de desconto sobre o subtotal dos produtos.
-        - **Frete:** grátis para clientes VIP; R$ 15,00 para os demais. O status VIP considerado
-          é o do cliente **antes** da compra. Se esta compra levar o total gasto a R$ 100,00 ou mais,
-          o cliente passa a ser VIP a partir da próxima compra (`becameVip: true`).
+        - **Frete:** grátis quando o subtotal dos produtos passa de R$ 100,00 (o desconto Pix
+          não é descontado para essa conta); R$ 15,00 nos demais casos.
       security: [{ bearerAuth: [] }]
       requestBody:
         required: true
@@ -346,8 +345,6 @@ components:
         id: { type: string }
         name: { type: string, example: Ana Souza }
         email: { type: string, example: ana@petshop.com }
-        totalSpent: { type: number, example: 0, description: Total já gasto em compras (R$) }
-        isVip: { type: boolean, example: false }
 
     AuthResponse:
       type: object
@@ -386,10 +383,10 @@ components:
           nullable: true
         subtotal: { type: number, example: 89.9 }
         discount: { type: number, example: 4.5, description: Desconto Pix (5% do subtotal) }
-        shipping: { type: number, example: 15, description: 0 para clientes VIP }
+        shipping: { type: number, example: 15, description: 0 quando o subtotal passa de R$ 100,00 }
         total: { type: number, example: 100.4 }
-        isVip: { type: boolean, example: false }
         freeShipping: { type: boolean, example: false }
+        freeShippingThreshold: { type: number, example: 100, description: Subtotal acima do qual o frete é grátis }
 
     Cart:
       type: object
@@ -422,18 +419,13 @@ components:
         discount: { type: number, example: 4.5 }
         shipping: { type: number, example: 15 }
         total: { type: number, example: 100.4 }
-        vipAtPurchase: { type: boolean, example: false }
+        freeShipping: { type: boolean, example: false }
         createdAt: { type: string, format: date-time }
 
     CheckoutResponse:
       type: object
       properties:
         order: { $ref: '#/components/schemas/Order' }
-        user: { $ref: '#/components/schemas/User' }
-        becameVip:
-          type: boolean
-          description: true se esta compra tornou o cliente VIP
-          example: true
 
     Error:
       type: object

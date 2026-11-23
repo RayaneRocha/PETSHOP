@@ -32,8 +32,8 @@ Pré-requisitos:
 - Acesso à internet na **primeira** instalação: o `mongodb-memory-server` baixa o binário do MongoDB automaticamente (fica em cache para as próximas execuções).
 
 ```bash
-git clone <url-do-repositorio>
-cd petshop-ecommerce
+git clone https://github.com/RayaneRocha/PETSHOP.git
+cd PETSHOP
 npm install
 ```
 
@@ -138,7 +138,7 @@ curl -s -X POST http://localhost:3000/api/checkout \
 ## Estrutura do projeto
 
 ```
-petshop-ecommerce/
+PETSHOP/
 ├── docs/
 │   └── swagger.yaml          # Especificação OpenAPI 3 da API
 ├── public/                   # Site Web (estático)

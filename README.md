@@ -56,6 +56,12 @@ A aplicação sobe na porta **3000** por padrão. Variáveis de ambiente opciona
 | `PORT` | `3000` | Porta HTTP |
 | `JWT_SECRET` | `petshop-dev-secret` | Chave de assinatura do JWT |
 | `JWT_EXPIRES_IN` | `8h` | Validade do token |
+| `MONGO_LAUNCH_TIMEOUT_MS` | `60000` | Tempo máximo (ms) para o MongoDB em memória iniciar |
+
+### Problemas comuns
+
+- **`Instance failed to start within ...ms`** ao rodar `npm start`: o MongoDB em memória demorou para subir ou ficou um processo preso de uma execução anterior. Encerre-o com `taskkill //F //IM mongod.exe` (Git Bash) ou `taskkill /F /IM mongod.exe` (PowerShell) e rode `npm start` de novo.
+- **`ERR_CONNECTION_REFUSED`** no navegador: a aplicação não está rodando; execute `npm start` e mantenha o terminal aberto.
 
 > O banco é **em memória**: a cada inicialização ele é recriado do zero com os dados de teste abaixo. Tudo o que for cadastrado/comprado se perde quando a aplicação é encerrada.
 

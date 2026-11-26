@@ -192,11 +192,12 @@ Ao rodar `npm run cy:run` (ou `npm run cy:run:headed`), as evidências ficam em:
 | Evidência | Onde fica |
 | --- | --- |
 | Relatório HTML com resultado e print de cada teste | `cypress/reports/index.html` (abra no navegador) |
-| Print do final de cada teste (`CT01 - passou.png`, ...) | `cypress/screenshots/<spec>/` |
+| Print de **cada passo** dos casos de teste (`CT01/Passo 01 - Tela de login.png`, ...) | `cypress/screenshots/<spec>/<CTxx>/` |
 | Vídeo da execução de cada spec | `cypress/videos/` |
 
 > O Cypress apaga as evidências anteriores a cada nova execução de `cy:run`. Copie a pasta para outro lugar se quiser guardar o histórico.
 > Na interface (`npm run cy:open`) são gerados apenas os prints; vídeo e relatório HTML só no modo `cy:run`.
+> Em caso de falha, o Cypress também salva um print do momento do erro (`... (failed).png`).
 
 ## Estrutura do projeto
 

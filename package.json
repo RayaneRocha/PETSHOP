@@ -5,7 +5,10 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "node --watch src/server.js"
+    "dev": "node --watch src/server.js",
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
+    "test:e2e": "cypress run"
   },
   "engines": {
     "node": ">=18"
@@ -26,5 +29,8 @@
     "mongodb-memory-server": "^10.1.4",
     "mongoose": "^8.9.5",
     "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "cypress": "^14.0.0"
   }
 }

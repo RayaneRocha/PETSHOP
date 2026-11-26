@@ -32,6 +32,8 @@ tags:
     description: Finalização de compra
   - name: Sistema
     description: Saúde da aplicação
+  - name: Testes
+    description: Apoio à automação de testes (indisponível com NODE_ENV=production)
 
 paths:
   /api/health:
@@ -47,6 +49,23 @@ paths:
                 type: object
                 properties:
                   status: { type: string, example: ok }
+
+  /api/test/reset:
+    post:
+      tags: [Testes]
+      summary: Restaura o banco para os dados de teste iniciais
+      description: Apaga carrinhos e pedidos e recria os 3 usuários e 3 produtos. Usado pela automação Cypress.
+      responses:
+        '200':
+          description: Banco restaurado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+                  products: { type: integer, example: 3 }
+                  users: { type: integer, example: 3 }
 
   /api/auth/register:
     post:

@@ -145,10 +145,52 @@ curl -s -X POST http://localhost:3000/api/checkout \
   -d '{"paymentMethod":"pix"}'
 ```
 
+## Testes automatizados (Cypress)
+
+A pasta `cypress/` contém a automação E2E do site, baseada no documento de casos de teste do PetShop Amigo (CT01 a CT16).
+
+| Arquivo | Casos |
+| --- | --- |
+| `cypress/e2e/01-login.cy.js` | CT01 a CT03 — Login |
+| `cypress/e2e/02-cadastro.cy.js` | CT04 a CT07 — Cadastro |
+| `cypress/e2e/03-carrinho.cy.js` | CT08 a CT12 — Carrinho e estoque |
+| `cypress/e2e/04-finalizacao-compra.cy.js` | CT13 a CT16 — Finalização de compra, Pix e frete |
+
+Antes de cada teste, a automação chama `POST /api/test/reset`, que restaura o banco para os dados de teste iniciais. Essa rota só existe quando `NODE_ENV` não é `production`.
+
+### Como executar
+
+1. Instale as dependências (inclui o Cypress) e o binário do Cypress:
+
+   ```bash
+   npm install
+   npx cypress install
+   ```
+
+   > Versões recentes do npm não executam scripts de instalação automaticamente; por isso o `npx cypress install` baixa o binário do Cypress (só na primeira vez).
+
+2. Em um terminal, suba a aplicação e deixe-o aberto:
+
+   ```bash
+   npm start
+   ```
+
+3. Em **outro** terminal, rode os testes:
+
+   ```bash
+   npm run cy:run    # modo headless, mostra o resultado no terminal
+   npm run cy:open   # abre a interface do Cypress para acompanhar os testes
+   ```
+
 ## Estrutura do projeto
 
 ```
 PETSHOP/
+├── cypress/                  # Automação E2E (Cypress)
+│   ├── e2e/                  # Specs: login, cadastro, carrinho, finalização de compra
+│   ├── fixtures/dados.json   # Usuário e produtos de teste
+│   └── support/commands.js   # Comandos customizados
+├── cypress.config.js
 ├── docs/
 │   └── swagger.yaml          # Especificação OpenAPI 3 da API
 ├── public/                   # Site Web (estático)

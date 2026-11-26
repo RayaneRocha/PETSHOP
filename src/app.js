@@ -8,6 +8,7 @@ const authRoutes = require('./routes/auth.routes');
 const productRoutes = require('./routes/products.routes');
 const cartRoutes = require('./routes/cart.routes');
 const checkoutRoutes = require('./routes/checkout.routes');
+const testRoutes = require('./routes/test.routes');
 const errorHandler = require('./middlewares/errorHandler');
 
 const SWAGGER_PATH = path.join(__dirname, '..', 'docs', 'swagger.yaml');
@@ -22,6 +23,9 @@ function createApp() {
   app.use('/api/products', productRoutes);
   app.use('/api/cart', cartRoutes);
   app.use('/api/checkout', checkoutRoutes);
+  if (process.env.NODE_ENV !== 'production') {
+    app.use('/api/test', testRoutes);
+  }
   app.use('/api', (req, res) => res.status(404).json({ error: 'Rota não encontrada.' }));
 
   // Documentação: YAML bruto e Swagger UI renderizando o YAML

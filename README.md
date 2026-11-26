@@ -199,6 +199,50 @@ Ao rodar `npm run cy:run` (ou `npm run cy:run:headed`), as evidências ficam em:
 > Na interface (`npm run cy:open`) são gerados apenas os prints; vídeo e relatório HTML só no modo `cy:run`.
 > Em caso de falha, o Cypress também salva um print do momento do erro (`... (failed).png`).
 
+## Teste de performance (k6)
+
+O arquivo `performance/load-test.js` contém um **teste de carga** da API feito com [k6](https://grafana.com/docs/k6/latest/).
+
+Cada usuário virtual cria a própria conta e repete a jornada de um cliente: consultar produtos → login → adicionar ao carrinho → consultar o carrinho com Pix → esvaziar o carrinho. A finalização de compra fica de fora para não esgotar o estoque durante a carga.
+
+**Perfil padrão:** sobe até 20 usuários em 30s, mantém por 1 minuto e desce em 15s.
+
+**Critérios de aceite (thresholds):**
+
+| Métrica | Limite |
+| --- | --- |
+| Requisições com erro | < 1% |
+| Validações (checks) com sucesso | > 99% |
+| Tempo de resposta p(95), geral | < 500 ms |
+| p(95) de produtos, carrinho (adicionar, consultar, esvaziar) | < 300 ms |
+| p(95) do login (usa bcrypt) | < 800 ms |
+
+### Como executar
+
+1. Instale o k6 (uma vez). No Windows:
+
+   ```bash
+   winget install k6 --source winget
+   ```
+
+   Feche e abra o terminal depois da instalação e confira com `k6 version`.
+
+2. Suba a aplicação em um terminal (`npm start`).
+3. Em outro terminal, rode:
+
+   ```bash
+   npm run perf:load
+   # ou personalizando a carga:
+   k6 run -e VUS=50 -e DURACAO=2m performance/load-test.js
+   ```
+
+O resultado aparece no terminal e também é salvo em:
+
+- `performance/reports/load-test.html`: relatório HTML (abra no navegador)
+- `performance/reports/load-test-summary.json`: métricas completas em JSON
+
+> O teste de carga zera o banco no início (`POST /api/test/reset`) e cria vários usuários de teste. Reinicie a aplicação depois, se quiser voltar aos dados originais.
+
 ## Estrutura do projeto
 
 ```
@@ -209,6 +253,8 @@ PETSHOP/
 │   ├── fixtures/dados.json   # Usuário e produtos de teste
 │   └── support/commands.js   # Comandos customizados
 ├── cypress.config.js
+├── performance/
+│   └── load-test.js          # Teste de carga (k6)
 ├── docs/
 │   └── swagger.yaml          # Especificação OpenAPI 3 da API
 ├── public/                   # Site Web (estático)

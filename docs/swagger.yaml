@@ -9,8 +9,7 @@ info:
 
     **Regras de negócio**
     1. Pagamento em **Pix** recebe **5% de desconto** sobre o subtotal dos produtos.
-    2. Produtos **esgotados** podem ser adicionados ao carrinho, mas a compra só é finalizada
-       com estoque disponível. Para produtos com estoque, o carrinho respeita o limite do estoque.
+    2. Produtos só podem ser adicionados ao carrinho se tiverem **estoque** suficiente.
     3. Compras com subtotal dos produtos **acima de R$ 100,00** têm **frete grátis**
        (as demais pagam R$ 15,00).
 
@@ -185,9 +184,8 @@ paths:
       tags: [Carrinho]
       summary: Adiciona um produto ao carrinho
       description: |
-        **Regra 2:** produtos esgotados (estoque 0) podem ser adicionados. Para produtos com estoque,
-        a quantidade é somada à que já está no carrinho e o total não pode passar do estoque disponível.
-        O checkout recusa (409) itens sem estoque suficiente.
+        **Regra 2:** o produto só é adicionado se houver estoque. Se ele já estiver no carrinho,
+        a quantidade é somada e o total não pode passar do estoque disponível.
       security: [{ bearerAuth: [] }]
       requestBody:
         required: true
@@ -318,7 +316,7 @@ components:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
           example:
-            error: Alguns produtos não têm estoque suficiente.
+            error: O produto "Coleira Antipulgas" está sem estoque.
 
   schemas:
     PaymentMethod:

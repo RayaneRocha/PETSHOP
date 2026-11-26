@@ -83,15 +83,12 @@ Carregados automaticamente na inicialização (`src/seed.js`).
 | --- | --- | --- | --- | --- |
 | Ração Premium para Cães Adultos 10kg | Cães | R$ 149,90 | 10 | Produto com estoque |
 | Arranhador para Gatos com Torre | Gatos | R$ 89,90 | 5 | Estoque baixo (testar limite) |
-| Coleira Antipulgas | Acessórios | R$ 59,90 | **0** | Esgotado: entra no carrinho, mas bloqueia a finalização |
+| Coleira Antipulgas | Acessórios | R$ 59,90 | **0** | Sem estoque: não pode ir para o carrinho |
 
 ## Quais são as regras de negócio
 
 1. **Desconto no Pix:** pagamentos com `paymentMethod = pix` recebem **5% de desconto sobre o subtotal dos produtos** (o frete não entra no cálculo do desconto). Formas de pagamento aceitas: `pix`, `cartao_credito` e `boleto`.
-2. **Estoque:**
-   - Produtos **esgotados** (estoque 0) **podem** ser adicionados ao carrinho.
-   - Para produtos com estoque, a quantidade total no carrinho (incluindo o que já estava lá) não pode passar do estoque disponível; caso contrário a API responde `409 Conflict`.
-   - A **finalização da compra** revalida o estoque: se algum item estiver esgotado ou acima do estoque, o checkout é recusado (`409 Conflict`) e o cliente precisa remover/ajustar o item. O estoque só é baixado quando o pedido é confirmado.
+2. **Estoque:** um produto só pode ser adicionado ao carrinho se tiver estoque. A quantidade total do produto no carrinho (incluindo o que já estava lá) não pode passar do estoque disponível — caso contrário a API responde `409 Conflict`. O estoque é **revalidado na finalização** da compra e baixado somente quando o pedido é confirmado.
 3. **Frete grátis acima de R$ 100,00:** compras cujo **subtotal dos produtos** passa de **R$ 100,00** têm frete grátis, para qualquer cliente. As demais pagam frete fixo de **R$ 15,00**.
    - A comparação usa o subtotal **antes** do desconto do Pix.
    - Exatamente R$ 100,00 não conta como "acima": paga frete.

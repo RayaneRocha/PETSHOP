@@ -10,7 +10,5 @@ module.exports = defineConfig({
     viewportHeight: 800,
     defaultCommandTimeout: 8000,
     video: false,
-    // Habilita o botão "Run all specs" na interface do Cypress (npm run cy:open)
-    experimentalRunAllSpecs: true,
   },
 });

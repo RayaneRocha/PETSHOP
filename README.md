@@ -185,6 +185,19 @@ Antes de cada teste, a automação chama `POST /api/test/reset`, que restaura o 
 
    Na interface do Cypress, clique em **`todos-os-testes.cy.js`** (pasta `cypress/suites`) para rodar os 16 testes de uma vez, ou em um spec da pasta `cypress/e2e` para rodar só uma funcionalidade.
 
+### Evidências dos testes
+
+Ao rodar `npm run cy:run` (ou `npm run cy:run:headed`), as evidências ficam em:
+
+| Evidência | Onde fica |
+| --- | --- |
+| Relatório HTML com resultado e print de cada teste | `cypress/reports/index.html` (abra no navegador) |
+| Print do final de cada teste (`CT01 - passou.png`, ...) | `cypress/screenshots/<spec>/` |
+| Vídeo da execução de cada spec | `cypress/videos/` |
+
+> O Cypress apaga as evidências anteriores a cada nova execução de `cy:run`. Copie a pasta para outro lugar se quiser guardar o histórico.
+> Na interface (`npm run cy:open`) são gerados apenas os prints; vídeo e relatório HTML só no modo `cy:run`.
+
 ## Estrutura do projeto
 
 ```

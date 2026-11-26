@@ -7,8 +7,9 @@
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
     "cy:open": "cypress open",
-    "cy:run": "cypress run",
-    "test:e2e": "cypress run"
+    "cy:run": "cypress run --spec \"cypress/e2e/**/*.cy.js\"",
+    "test:e2e": "cypress run --spec \"cypress/e2e/**/*.cy.js\"",
+    "cy:run:headed": "cypress run --headed --browser chrome --spec \"cypress/e2e/**/*.cy.js\""
   },
   "engines": {
     "node": ">=18"

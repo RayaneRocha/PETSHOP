@@ -178,9 +178,12 @@ Antes de cada teste, a automação chama `POST /api/test/reset`, que restaura o 
 3. Em **outro** terminal, rode os testes:
 
    ```bash
-   npm run cy:run    # modo headless, mostra o resultado no terminal
-   npm run cy:open   # abre a interface do Cypress para acompanhar os testes
+   npm run cy:run          # todos os testes sem abrir janela; resultado no terminal
+   npm run cy:run:headed   # todos os testes vendo o Chrome executar
+   npm run cy:open         # interface do Cypress
    ```
+
+   Na interface do Cypress, clique em **`todos-os-testes.cy.js`** (pasta `cypress/suites`) para rodar os 16 testes de uma vez, ou em um spec da pasta `cypress/e2e` para rodar só uma funcionalidade.
 
 ## Estrutura do projeto
 
@@ -188,6 +191,7 @@ Antes de cada teste, a automação chama `POST /api/test/reset`, que restaura o 
 PETSHOP/
 ├── cypress/                  # Automação E2E (Cypress)
 │   ├── e2e/                  # Specs: login, cadastro, carrinho, finalização de compra
+│   ├── suites/               # todos-os-testes.cy.js (roda tudo na interface)
 │   ├── fixtures/dados.json   # Usuário e produtos de teste
 │   └── support/commands.js   # Comandos customizados
 ├── cypress.config.js

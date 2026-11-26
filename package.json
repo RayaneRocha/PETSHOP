@@ -1,0 +1,36 @@
+{
+  "name": "petshop-ecommerce",
+  "version": "1.0.0",
+  "description": "API REST e site Web de um e-commerce de pet shop (login, cadastro, carrinho e finalização de compra).",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
+    "test:e2e": "cypress run"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "petshop",
+    "ecommerce",
+    "express",
+    "mongodb-memory-server",
+    "swagger"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "express": "^4.21.2",
+    "js-yaml": "^4.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb-memory-server": "^10.1.4",
+    "mongoose": "^8.9.5",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "cypress": "^14.0.0"
+  }
+}

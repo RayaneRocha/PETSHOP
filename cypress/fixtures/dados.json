@@ -1,0 +1,10 @@
+{
+  "usuarios": {
+    "ana": { "nome": "Ana Souza", "email": "ana@petshop.com", "senha": "senha123" }
+  },
+  "produtos": {
+    "racao": { "nome": "Ração Premium para Cães Adultos 10kg", "preco": "R$ 149,90", "estoque": 10 },
+    "arranhador": { "nome": "Arranhador para Gatos com Torre", "preco": "R$ 89,90", "estoque": 5 },
+    "coleira": { "nome": "Coleira Antipulgas", "preco": "R$ 59,90", "estoque": 0 }
+  }
+}

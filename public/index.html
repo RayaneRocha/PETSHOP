@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PetShop Amigo - Produtos</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="/index.html" class="logo">🐾 PetShop <span>Amigo</span></a>
+      <nav class="nav" id="nav"></nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Tudo para o seu pet</h1>
+      <p>Escolha os produtos, coloque no carrinho e finalize a compra em poucos cliques.</p>
+    </section>
+
+    <section class="perks" aria-label="Vantagens">
+      <div class="perk"><strong>💸 5% off no Pix</strong>Desconto aplicado no subtotal dos produtos.</div>
+      <div class="perk"><strong>🚚 Frete grátis acima de R$ 100,00</strong>Abaixo disso, o frete é R$ 15,00.</div>    </section>
+
+    <div id="alert" class="alert hidden"></div>
+    <section class="grid" id="products" aria-live="polite">
+      <p class="hint">Carregando produtos...</p>
+    </section>
+  </main>
+
+  <footer class="footer">PetShop Amigo · <a href="/api-docs">Documentação da API</a></footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/index.js"></script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PetShop Amigo - Cadastro</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="/index.html" class="logo">🐾 PetShop <span>Amigo</span></a>
+      <nav class="nav" id="nav"></nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="auth-card">
+      <h1>Criar conta</h1>
+      <div id="alert" class="alert hidden" role="alert"></div>
+      <form id="register-form" novalidate>
+        <div class="field">
+          <label for="name">Nome</label>
+          <input id="name" name="name" type="text" autocomplete="name" minlength="2" required>
+        </div>
+        <div class="field">
+          <label for="email">E-mail</label>
+          <input id="email" name="email" type="email" autocomplete="email" required>
+        </div>
+        <div class="field">
+          <label for="password">Senha</label>
+          <input id="password" name="password" type="password" autocomplete="new-password" minlength="6" required>
+          <span class="hint">Mínimo de 6 caracteres.</span>
+        </div>
+        <div class="field">
+          <label for="confirm">Confirmar senha</label>
+          <input id="confirm" name="confirm" type="password" autocomplete="new-password" required>
+        </div>
+        <button class="btn btn-block" type="submit">Cadastrar</button>
+      </form>
+      <p class="hint">Já tem conta? <a href="/login.html">Entrar</a></p>
+    </section>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/cadastro.js"></script>
+</body>
+</html>

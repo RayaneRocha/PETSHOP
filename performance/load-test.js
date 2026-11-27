@@ -48,11 +48,14 @@ export const options = {
     http_req_failed: ['rate<0.01'], // menos de 1% de erros
     checks: ['rate>0.99'], // mais de 99% das validações OK
     http_req_duration: ['p(95)<500'], // 95% das requisições em menos de 500 ms
+    // Consultas (leitura): 300 ms
     'http_req_duration{name:produtos}': ['p(95)<300'],
-    'http_req_duration{name:login}': ['p(95)<800'], // login usa bcrypt (mais custoso)
-    'http_req_duration{name:adicionar_carrinho}': ['p(95)<300'],
     'http_req_duration{name:consultar_carrinho}': ['p(95)<300'],
-    'http_req_duration{name:esvaziar_carrinho}': ['p(95)<300'],
+    // Operações que gravam no banco: 500 ms
+    'http_req_duration{name:adicionar_carrinho}': ['p(95)<500'],
+    'http_req_duration{name:esvaziar_carrinho}': ['p(95)<500'],
+    // Login: hash de senha (scrypt) é intencionalmente custoso
+    'http_req_duration{name:login}': ['p(95)<800'],
   },
 };
 

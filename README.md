@@ -214,7 +214,8 @@ Cada usuário virtual cria a própria conta e repete a jornada de um cliente: co
 | Requisições com erro | < 1% |
 | Validações (checks) com sucesso | > 99% |
 | Tempo de resposta p(95), geral | < 500 ms |
-| p(95) de produtos, carrinho (adicionar, consultar, esvaziar) | < 300 ms |
+| p(95) das consultas (produtos, consultar carrinho) | < 300 ms |
+| p(95) das operações que gravam dados (adicionar e esvaziar carrinho) | < 500 ms |
 | p(95) do login (hash de senha com scrypt) | < 800 ms |
 
 ### Como executar

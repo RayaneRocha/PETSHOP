@@ -1,4 +1,4 @@
-const bcrypt = require('bcryptjs');
+const { hashPassword } = require('./utils/password');
 const User = require('./models/User');
 const Product = require('./models/Product');
 
@@ -40,7 +40,7 @@ const users = [
 async function seed() {
   await Promise.all([User.deleteMany({}), Product.deleteMany({})]);
 
-  const passwordHash = await bcrypt.hash(DEFAULT_PASSWORD, 10);
+  const passwordHash = await hashPassword(DEFAULT_PASSWORD);
   await Product.insertMany(products);
   await User.insertMany(users.map((user) => ({ ...user, passwordHash })));
 

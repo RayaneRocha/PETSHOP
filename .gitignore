@@ -6,3 +6,6 @@ coverage/
 cypress/videos/
 cypress/screenshots/
 cypress/downloads/
+cypress/reports/
+performance/reports/*
+!performance/reports/.gitkeep

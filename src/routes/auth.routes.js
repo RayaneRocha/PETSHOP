@@ -1,9 +1,9 @@
 const express = require('express');
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const AppError = require('../utils/AppError');
 const asyncHandler = require('../utils/asyncHandler');
+const { hashPassword, verifyPassword } = require('../utils/password');
 const authenticate = require('../middlewares/auth');
 const { jwtSecret, jwtExpiresIn } = require('../config');
 
@@ -36,7 +36,7 @@ router.post(
     const user = await User.create({
       name: name.trim(),
       email,
-      passwordHash: await bcrypt.hash(password, 10),
+      passwordHash: await hashPassword(password),
     });
 
     res.status(201).json({ token: issueToken(user), user: user.toPublicJSON() });
@@ -51,7 +51,7 @@ router.post(
     if (!email || !password) throw new AppError(400, 'email e password são obrigatórios.');
 
     const user = await User.findOne({ email: String(email).toLowerCase().trim() });
-    const valid = user && (await bcrypt.compare(String(password), user.passwordHash));
+    const valid = user && (await verifyPassword(password, user.passwordHash));
     if (!valid) throw new AppError(401, 'E-mail ou senha inválidos.');
 
     res.json({ token: issueToken(user), user: user.toPublicJSON() });

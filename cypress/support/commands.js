@@ -65,3 +65,28 @@ Cypress.Commands.add('linhaDoResumo', (container, rotulo, valorEsperado) => {
     .contains('.summary-row', rotulo)
     .deveConterTexto(valorEsperado);
 });
+
+/**
+ * Evidência de um passo do caso de teste: tira um print da tela salvo em
+ * cypress/screenshots/<spec>/<CTxx>/Passo NN - <descrição>.png (também vai para o relatório HTML).
+ */
+Cypress.Commands.add('evidencia', (passo, descricao) => {
+  const ct = Cypress.currentTest.title.split(' - ')[0];
+  const nome = `${ct}/Passo ${String(passo).padStart(2, '0')} - ${descricao}`.replace(/[\\:*?"<>|]/g, '');
+  cy.screenshot(nome, { capture: 'viewport', overwrite: true });
+});
+
+/** Passos 1 e 2 dos casos que começam pelo login da Ana, com evidência de cada passo. */
+Cypress.Commands.add('loginComEvidencia', (email, senha) => {
+  cy.visit('/login.html');
+  cy.get('#email').should('be.visible');
+  cy.evidencia(1, 'Tela de login');
+
+  cy.get('#email').type(email);
+  cy.get('#password').type(senha, { log: false });
+  cy.get('#login-form button[type="submit"]').click();
+  cy.location('pathname').should('eq', '/index.html');
+  cy.get('#nav').deveConterTexto('Olá');
+  cy.get('#products .card').should('have.length', 3);
+  cy.evidencia(2, 'Login realizado');
+});

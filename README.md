@@ -178,9 +178,71 @@ Antes de cada teste, a automação chama `POST /api/test/reset`, que restaura o 
 3. Em **outro** terminal, rode os testes:
 
    ```bash
-   npm run cy:run    # modo headless, mostra o resultado no terminal
-   npm run cy:open   # abre a interface do Cypress para acompanhar os testes
+   npm run cy:run          # todos os testes sem abrir janela; resultado no terminal
+   npm run cy:run:headed   # todos os testes vendo o Chrome executar
+   npm run cy:open         # interface do Cypress
    ```
+
+   Na interface do Cypress, clique em **`todos-os-testes.cy.js`** (pasta `cypress/suites`) para rodar os 16 testes de uma vez, ou em um spec da pasta `cypress/e2e` para rodar só uma funcionalidade.
+
+### Evidências dos testes
+
+Ao rodar `npm run cy:run` (ou `npm run cy:run:headed`), as evidências ficam em:
+
+| Evidência | Onde fica |
+| --- | --- |
+| Relatório HTML com resultado e print de cada teste | `cypress/reports/index.html` (abra no navegador) |
+| Print de **cada passo** dos casos de teste (`CT01/Passo 01 - Tela de login.png`, ...) | `cypress/screenshots/<spec>/<CTxx>/` |
+| Vídeo da execução de cada spec | `cypress/videos/` |
+
+> O Cypress apaga as evidências anteriores a cada nova execução de `cy:run`. Copie a pasta para outro lugar se quiser guardar o histórico.
+> Na interface (`npm run cy:open`) são gerados apenas os prints; vídeo e relatório HTML só no modo `cy:run`.
+> Em caso de falha, o Cypress também salva um print do momento do erro (`... (failed).png`).
+
+## Teste de performance (k6)
+
+O arquivo `performance/load-test.js` contém um **teste de carga** da API feito com [k6](https://grafana.com/docs/k6/latest/).
+
+Cada usuário virtual cria a própria conta e repete a jornada de um cliente: consultar produtos → login → adicionar ao carrinho → consultar o carrinho com Pix → esvaziar o carrinho. A finalização de compra fica de fora para não esgotar o estoque durante a carga.
+
+**Perfil padrão:** sobe até 20 usuários em 30s, mantém por 1 minuto e desce em 15s.
+
+**Critérios de aceite (thresholds):**
+
+| Métrica | Limite |
+| --- | --- |
+| Requisições com erro | < 1% |
+| Validações (checks) com sucesso | > 99% |
+| Tempo de resposta p(95), geral | < 500 ms |
+| p(95) das consultas (produtos, consultar carrinho) | < 300 ms |
+| p(95) das operações que gravam dados (adicionar e esvaziar carrinho) | < 500 ms |
+| p(95) do login (hash de senha com scrypt) | < 800 ms |
+
+### Como executar
+
+1. Instale o k6 (uma vez). No Windows:
+
+   ```bash
+   winget install k6 --source winget
+   ```
+
+   Feche e abra o terminal depois da instalação e confira com `k6 version`.
+
+2. Suba a aplicação em um terminal (`npm start`).
+3. Em outro terminal, rode:
+
+   ```bash
+   npm run perf:load
+   # ou personalizando a carga:
+   k6 run -e VUS=50 -e DURACAO=2m performance/load-test.js
+   ```
+
+O resultado aparece no terminal e também é salvo em:
+
+- `performance/reports/load-test.html`: relatório HTML (abra no navegador)
+- `performance/reports/load-test-summary.json`: métricas completas em JSON
+
+> O teste de carga zera o banco no início (`POST /api/test/reset`) e cria vários usuários de teste. Reinicie a aplicação depois, se quiser voltar aos dados originais.
 
 ## Estrutura do projeto
 
@@ -188,9 +250,12 @@ Antes de cada teste, a automação chama `POST /api/test/reset`, que restaura o 
 PETSHOP/
 ├── cypress/                  # Automação E2E (Cypress)
 │   ├── e2e/                  # Specs: login, cadastro, carrinho, finalização de compra
+│   ├── suites/               # todos-os-testes.cy.js (roda tudo na interface)
 │   ├── fixtures/dados.json   # Usuário e produtos de teste
 │   └── support/commands.js   # Comandos customizados
 ├── cypress.config.js
+├── performance/
+│   └── load-test.js          # Teste de carga (k6)
 ├── docs/
 │   └── swagger.yaml          # Especificação OpenAPI 3 da API
 ├── public/                   # Site Web (estático)

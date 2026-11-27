@@ -43,13 +43,17 @@ function assertStock(product, desiredQuantity) {
   }
 }
 
-/** Monta a visão do carrinho com produtos, totais e o resumo de valores. */
-async function buildCartView(user, paymentMethod) {
+/**
+ * Monta a visão do carrinho com produtos, totais e o resumo de valores.
+ * Quando o carrinho já foi carregado (ex.: logo após salvar), ele é reaproveitado
+ * para evitar uma nova consulta ao banco.
+ */
+async function buildCartView(user, paymentMethod, loadedCart) {
   if (paymentMethod && !isValidPaymentMethod(paymentMethod)) {
     throw new AppError(400, 'paymentMethod inválido. Use: pix, cartao_credito ou boleto.');
   }
 
-  const cart = await getOrCreateCart(user._id);
+  const cart = loadedCart || (await getOrCreateCart(user._id));
   await cart.populate('items.product');
 
   // Remove itens cujo produto não existe mais.
@@ -76,10 +80,19 @@ async function buildCartView(user, paymentMethod) {
   };
 }
 
+// Produto e carrinho são buscados em paralelo (consultas independentes).
+async function loadProductAndCart(user, productId) {
+  assertProductId(productId);
+  const [product, cart] = await Promise.all([
+    findProductOrFail(productId),
+    getOrCreateCart(user._id),
+  ]);
+  return { product, cart };
+}
+
 async function addItem(user, productId, quantity = 1) {
   assertQuantity(quantity);
-  const product = await findProductOrFail(productId);
-  const cart = await getOrCreateCart(user._id);
+  const { product, cart } = await loadProductAndCart(user, productId);
 
   const existing = cart.items.find((item) => item.product.toString() === product._id.toString());
   const desired = (existing ? existing.quantity : 0) + quantity;
@@ -89,13 +102,12 @@ async function addItem(user, productId, quantity = 1) {
   else cart.items.push({ product: product._id, quantity });
 
   await cart.save();
-  return buildCartView(user);
+  return buildCartView(user, undefined, cart);
 }
 
 async function updateItem(user, productId, quantity) {
   assertQuantity(quantity);
-  const product = await findProductOrFail(productId);
-  const cart = await getOrCreateCart(user._id);
+  const { product, cart } = await loadProductAndCart(user, productId);
 
   const existing = cart.items.find((item) => item.product.toString() === product._id.toString());
   if (!existing) throw new AppError(404, 'Produto não está no carrinho.');
@@ -103,7 +115,7 @@ async function updateItem(user, productId, quantity) {
   assertStock(product, quantity);
   existing.quantity = quantity;
   await cart.save();
-  return buildCartView(user);
+  return buildCartView(user, undefined, cart);
 }
 
 async function removeItem(user, productId) {
@@ -113,14 +125,14 @@ async function removeItem(user, productId) {
   cart.items = cart.items.filter((item) => item.product.toString() !== productId);
   if (cart.items.length === before) throw new AppError(404, 'Produto não está no carrinho.');
   await cart.save();
-  return buildCartView(user);
+  return buildCartView(user, undefined, cart);
 }
 
 async function clearCart(user) {
   const cart = await getOrCreateCart(user._id);
   cart.items = [];
   await cart.save();
-  return buildCartView(user);
+  return buildCartView(user, undefined, cart);
 }
 
 module.exports = {
